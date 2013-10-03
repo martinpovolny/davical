@@ -410,6 +410,16 @@ function LDAP_check($username, $password ){
 
 }
 
+function fix_unique_member($list) {
+  $fixed_list = array();
+  foreach ( $list as $member ){
+    list( $mem, $rest ) = explode(",", $member );
+    $member = str_replace( 'uid=', '', $mem );
+    array_unshift( $fixed_list, $member );
+  }
+  return $fixed_list;
+}
+
 /**
 * sync LDAP Groups against the DB
 */
@@ -500,6 +510,10 @@ function sync_LDAP_groups(){
       Principal::cacheDelete('username', $group);
       $c->messages[] = sprintf(i18n('- adding users %s to group : %s'),join(',',$ldap_groups_info[$group][$mapping['members']]),$group);
       foreach ( $ldap_groups_info[$group][$mapping['members']] as $member ){
+        if ( $member_field == 'uniqueMember' ) {
+          list( $mem, $rest ) = explode(",", $member );
+          $member = str_replace( 'uid=', '', $mem );
+        }
         $qry = new AwlQuery( "INSERT INTO group_member SELECT g.principal_id AS group_id,u.principal_id AS member_id FROM dav_principal g, dav_principal u WHERE g.username=:group AND u.username=:member;",array (':group'=>$group,':member'=>$member) );
         $qry->Exec('sync_LDAP_groups',__LINE__,__FILE__);
         Principal::cacheDelete('username', $member);
@@ -512,6 +526,9 @@ function sync_LDAP_groups(){
     foreach ( $groups_to_update as $group ){
       $db_members = array_values ( $db_group_members[$group] );
       $ldap_members = array_values ( $ldap_groups_info[$group][$member_field] );
+      if ( $member_field == 'uniqueMember' ) {
+        $ldap_members = fix_unique_member( $ldap_members );
+      }
       $add_users = array_diff ( $ldap_members, $db_members );
       if ( sizeof ( $add_users ) ){
         $c->messages[] = sprintf(i18n('- adding %s to group : %s'),join(', ', $add_users ), $group);
