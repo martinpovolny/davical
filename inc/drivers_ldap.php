@@ -302,7 +302,7 @@ function sync_user_from_LDAP( Principal &$principal, $mapping, $ldap_values ) {
       dbg_error_log( "LDAP", "Setting usr->%s to %s from configured defaults", $field, $c->authenticate_hook['config']['default_value'][$field] );
     }
   }
-    
+
   if ( $principal->Exists() ) {
     $principal->Update($fields_to_set);
   }
@@ -406,10 +406,10 @@ function LDAP_check($username, $password ){
     dbg_error_log( "LDAP", "user %s doesn't exist in local DB, we need to create it",$username );
   }
   $principal->setUsername($username);
-  
+
   // The local cached user doesn't exist, or is older, so we create/update their details
   sync_user_from_LDAP( $principal, $mapping, $valid );
-  
+
   return $principal;
 
 }
@@ -537,6 +537,10 @@ function sync_LDAP_groups(){
       if ( sizeof ( $add_users ) ){
         $c->messages[] = sprintf(i18n('- adding %s to group : %s'),join(', ', $add_users ), $group);
         foreach ( $add_users as $member ){
+          //if ( $member_field == 'uniqueMember' ) {
+          //  list( $mem, $rest ) = explode(",", $member );
+          //  $member = str_replace( 'uid=', '', $mem );
+          //}
           $qry = new AwlQuery( "INSERT INTO group_member SELECT g.principal_id AS group_id,u.principal_id AS member_id FROM dav_principal g, dav_principal u WHERE g.username=:group AND u.username=:member",array (':group'=>$group,':member'=>$member) );
           $qry->Exec('sync_LDAP_groups',__LINE__,__FILE__);
           Principal::cacheDelete('username', $member);
