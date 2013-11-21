@@ -1,3 +1,9 @@
+davical (1.1.3-4) unstable; urgency=low
+
+  * New build with uniquMember fix and new awl.
+
+ -- Martin Povolny <martin.povolny@solnet.cz>  Thu, 21 Nov 2013 15:55:36 +0100
+
 davical (1.1.2-1) unstable; urgency=low
 
   * New upstream release (closes: #656395, #702403, #703290, #703383, #703387)
