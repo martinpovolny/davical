@@ -134,7 +134,7 @@ $vcard->Write( $row->dav_id, $dest->Exists() );
 
 $qry->QDo("SELECT write_sync_change( $collection_id, $response_code, :dav_name)", array(':dav_name' => $dest->bound_from() ) );
 
-if ( isset($log_action) && $log_action && function_exists('log_caldav_action') ) {
+if ( function_exists('log_caldav_action') ) {
   log_caldav_action( $put_action_type, $uid, $user_no, $collection_id, $request->path );
 }
 else if ( isset($log_action) && $log_action  ) {
